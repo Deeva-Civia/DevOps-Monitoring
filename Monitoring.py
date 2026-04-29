@@ -16,7 +16,7 @@ TARGET_WA = os.getenv("WHATSAPP_TARGET")
 
 
 # Konfigurasi API Gemini
-genai.configure(api_key="API_KEY_GEMINI")
+genai.configure(api_key=API_KEY_GEMINI)
 
 model = genai.GenerativeModel(model_name="gemini-2.5-flash")
 
@@ -39,9 +39,9 @@ def get_gemini_analysis(log_text):
         return f"Gagal mendapatkan analisis dari Gemini: {e}"
 
 def send_whatsapp(message):
-    token = "TOKEN_FONNTE"
+    token = TOKEN_FONNTE
     payload = {
-        "target": "TARGET_WA",
+        "target": TARGET_WA,
         "message": message
     }
     headers = { "Authorization": token}
