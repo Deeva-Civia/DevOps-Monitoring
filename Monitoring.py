@@ -23,7 +23,7 @@ model = genai.GenerativeModel(model_name="gemini-2.5-flash")
 def get_ssh_attempts():
     try:
         result = subprocess.run(
-            "grep 'Failed password' /var/log/auth.log | tail -n 10", 
+            "grep -Ei 'Failed password|Accepted password|Accepted publickey|error:|warning:' /var/log/auth.log | tail -n 10",
             shell=True, capture_output=True, text=True
         )
         return result.stdout.strip()
@@ -33,7 +33,8 @@ def get_ssh_attempts():
 
 def get_gemini_analysis(log_text):
     try:
-        response = model.generate_content(f"Ada percobaan login brute force:\n{log_text}\nApa yang sebaiknya saya lakukan?.responnya jangan terlalu panjang")
+        prompt = f"Berikut adalah log aktivitas server terbaru (bisa berisi login berhasil, gagal, error, atau warning):\n{log_text}\n\nTolong analisis secara singkat. Apakah ini aktivitas normal, ancaman keamanan, atau masalah sistem? Berikan satu kalimat kesimpulan dan rekomendasi tindakan."
+        response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         return f"Gagal mendapatkan analisis dari Gemini: {e}"
@@ -57,7 +58,7 @@ if not log:
 print("Terdeteksi aktivitas mencurigakan, meminta analisis AI...")
 ai_response = get_gemini_analysis(log)
 
-full_message = f"[{datetime.datetime.now()}] Percobaan Login Detected!\n\n{log}\n\n *Gemini says:*\n{ai_response}"
+full_message = f"[{datetime.datetime.now()}] Server Activity Alert!\n\n{log}\n\n *Gemini Analysis:*\n{ai_response}"
 
 print("Mengirim notifikasi WhatsApp...")
 status = send_whatsapp(full_message)
